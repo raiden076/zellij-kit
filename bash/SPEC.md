@@ -88,3 +88,4 @@ T13 | x | verify: zellij session → bare panes only, no arrows/shadows, no wasm
 | B10 | 2026-05-09 | compact-bar tooltip incorrectly bound to F1 (inaccessible on phone); `?` incorrectly excluded from normal mode | change tooltip key to Ctrl+h; move `?` from shared_except "locked" "normal" to shared_except "locked" |
 B11 | 2026-05-09 | zjstatus WASM plugin broken: renders only green line, no content | replaced with tab-bar + simplified_ui; later removed entirely for bare layout (B12)
 B12 | 2026-05-09 | tab-bar + hint pane added noise on phone; ESC/? behavior inconsistent | stripped to bare layout; help via floating `?` pane only; esc → locked from all modes
+B13 | 2026-08-24 | zellij via `cargo binstall` lives in ~/.cargo/bin, not on PATH when selector execs (before .bashrc); `exec zellij` fails "not found" | selector resolves zellij across PATH + ~/.cargo/bin + kit bin; bash_profile sources ~/.cargo/env before the guard

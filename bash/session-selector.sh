@@ -31,12 +31,20 @@ read_line() {
     fi
 }
 
-# ── list sessions (zellij: ANSI-stripped text) ──
+# Locate zellij: PATH first, then common install dirs (cargo binstall, kit bin, system)
+ZELLIJ_BIN=""
+for c in "$(command -v zellij 2>/dev/null)" "$HOME/.cargo/bin/zellij" "$HOME/.local/bin/zellij" /usr/local/bin/zellij /usr/bin/zellij; do
+    if [[ -n "$c" ]] && [[ -x "$c" ]]; then ZELLIJ_BIN="$c"; break; fi
+done
+if [[ -z "$ZELLIJ_BIN" ]]; then
+    echo "zellij not found — install it (e.g. 'cargo binstall zellij'), then re-login." >&2
+    exit 1
+fi
 
 strip_ansi() { sed $'s/\033\\[[0-9;]*[a-zA-Z]//g'; }
 
 mapfile -t sessions < <(
-    zellij list-sessions 2>/dev/null | strip_ansi | while IFS= read -r line; do
+    "$ZELLIJ_BIN" list-sessions 2>/dev/null | strip_ansi | while IFS= read -r line; do
         # Skip dead sessions
         [[ "$line" =~ \[Dead\] || "$line" =~ \[Exit\] ]] && continue
         # Session name = first token, strip any trailing \r
@@ -98,11 +106,11 @@ while true; do
                 echo "Empty name, aborting."
                 continue
             fi
-            exec zellij -s "$user_name"
+            exec "$ZELLIJ_BIN" -s "$user_name"
             ;;
         r)
             # V2 + V6: auto random name
-            exec zellij -s "$(auto_name)"
+            exec "$ZELLIJ_BIN" -s "$(auto_name)"
             ;;
         '')
             # V1: empty → re-prompt
@@ -119,7 +127,7 @@ while true; do
                 continue
             fi
             target="${sessions[$((choice - 1))]}"
-            exec zellij attach "$target"
+            exec "$ZELLIJ_BIN" attach "$target"
             ;;
         *)
             # Any other key → close connection

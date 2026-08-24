@@ -104,7 +104,9 @@ install_bash_profile() { # marker-guarded: never clobber a foreign .bash_profile
 
 cmd_install() {
     say "installing zellij-kit into $HOME"
-    command -v zellij >/dev/null 2>&1 || warn "zellij not found in PATH — install it, then re-run"
+    if ! command -v zellij >/dev/null 2>&1 && [[ ! -x "$HOME/.cargo/bin/zellij" ]]; then
+        warn "zellij not found — install it (e.g. 'cargo binstall zellij') and re-run"
+    fi
     mkdir -p "$ZDIR/layouts" "$BIN_DIR"
 
     install_file "$KIT_DIR/zellij/config.kdl" "$ZDIR/config.kdl"      "$LINK" 1

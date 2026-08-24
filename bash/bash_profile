@@ -7,6 +7,9 @@
 # 1. PATH first (before .bashrc needs it)
 export PATH="$HOME/.local/bin:$PATH"
 
+# 1b. rustup/cargo-installed tools (zellij via cargo binstall) — must precede the selector
+[[ -f "$HOME/.cargo/env" ]] && . "$HOME/.cargo/env"
+
 # 2. Session selector on SSH/ET interactive login.
 #    Must run BEFORE .bashrc to avoid a first-prompt flash (SPEC B2).
 #    Skipped when already inside zellij ($ZELLIJ set by session-selector.sh).
