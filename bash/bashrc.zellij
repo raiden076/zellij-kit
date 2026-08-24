@@ -1,0 +1,2 @@
+# quit zellij session
+alias by="zellij action detach"

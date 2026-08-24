@@ -1,0 +1,24 @@
+#
+# ~/.bash_profile — zellij-kit
+# Installed by zellij-kit/install.sh (idempotent; safe to re-run).
+# Drop this file's zellij guard into your own .bash_profile if you already have one.
+#
+
+# 1. PATH first (before .bashrc needs it)
+export PATH="$HOME/.local/bin:$PATH"
+
+# 2. Session selector on SSH/ET interactive login.
+#    Must run BEFORE .bashrc to avoid a first-prompt flash (SPEC B2).
+#    Skipped when already inside zellij ($ZELLIJ set by session-selector.sh).
+#    Triggers on: SSH_TTY set (SSH) OR SSH_CONNECTION set + SSH_TTY unset (ET).
+if [[ -z "${ZELLIJ:-}" ]] && [[ $- == *i* ]]; then
+    is_remote=false
+    [[ -n "${SSH_TTY:-}" ]] && is_remote=true
+    [[ -n "${SSH_CONNECTION:-}" ]] && [[ -z "${SSH_TTY:-}" ]] && is_remote=true
+    if $is_remote && command -v session-selector.sh &>/dev/null; then
+        exec session-selector.sh
+    fi
+fi
+
+# 3. Source .bashrc when everything is ready
+[[ -f ~/.bashrc ]] && . ~/.bashrc

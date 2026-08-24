@@ -1,0 +1,6 @@
+// zellij-kit
+layout {
+    default_tab_template {
+        children
+    }
+}
