@@ -30,12 +30,21 @@ say()  { printf '\033[1;32m==>\033[0m %s\n' "$*"; }
 warn() { printf '\033[1;33m[warn]\033[0m %s\n' "$*" >&2; }
 die()  { printf '\033[1;31m[error]\033[0m %s\n' "$*" >&2; exit 1; }
 
-backup() { # backup <file> — keep one .zellij.bak per replaced file; no-op if absent
-    local f="$1"
-    if [[ -e "$f" ]]; then
+backup() { # backup <file> — no-op if absent; NEVER overwrites an earlier backup
+    # Re-running install.sh used to `cp -a` over <file>.zellij.bak, so the second
+    # run destroyed the only copy of the user's original file (B16). Keep the
+    # first backup where uninstall expects it; park later states in numbered
+    # siblings so nothing is ever lost.
+    local f="$1" n=1
+    [[ -e "$f" ]] || return 0
+    if [[ ! -e "$f.zellij.bak" ]]; then
         cp -a "$f" "$f.zellij.bak"
         warn "backed up $f -> $f.zellij.bak"
+        return 0
     fi
+    while [[ -e "$f.zellij.bak.$n" ]]; do n=$((n+1)); done
+    cp -a "$f" "$f.zellij.bak.$n"
+    warn "kept original $f.zellij.bak; re-run state saved to $f.zellij.bak.$n"
 }
 
 is_ours() { # is_ours <file> — true if file exists and carries the kit marker
