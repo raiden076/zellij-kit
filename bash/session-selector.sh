@@ -45,8 +45,12 @@ strip_ansi() { sed $'s/\033\\[[0-9;]*[a-zA-Z]//g'; }
 
 mapfile -t sessions < <(
     "$ZELLIJ_BIN" list-sessions 2>/dev/null | strip_ansi | while IFS= read -r line; do
-        # Skip dead sessions
-        [[ "$line" =~ \[Dead\] || "$line" =~ \[Exit\] ]] && continue
+        # Skip dead sessions (V3). zellij >=0.4x prints
+        # "(EXITED - attach to resurrect)"; older releases used the bracketed
+        # [Dead]/[Exit] markers — match every form, or the picker offers
+        # month-old sessions that resolve to nothing with session_serialization
+        # false (kit config).
+        [[ "$line" == *EXITED* || "$line" == *"[Dead]"* || "$line" == *"[Exit]"* ]] && continue
         # Session name = first token, strip any trailing \r
         name="${line%% *}"
         name="${name%$'\r'}"
