@@ -56,7 +56,15 @@ check "H/J/K/L resize decrease" grep -q 'Resize "Decrease left"' "$CFG"
 
 echo "=== No lab-specific leftovers ==="
 check_neg "no web_server" grep -q '^web_server true$' "$CFG"
-check_neg "no absolute home paths" grep -q '/home/' "$CFG"
+# A naive `grep -q '/home/'` can never pass on a host whose $HOME lives under
+# /home: install.sh renders the help pane path as an absolute $ZDIR/help.sh.
+# What matters is that no OTHER machine's home path leaked into the config.
+foreign_home_paths() {
+    local extra
+    extra="$(grep -oE '/home/[^"[:space:]]*' "$CFG" | sort -u | grep -vF "$ZDIR/help.sh" || true)"
+    [[ -n "$extra" ]]
+}
+check_neg "no foreign home paths" foreign_home_paths
 
 echo "=== Config parse ==="
 if zellij setup --check 2>&1 | grep -q 'CONFIG FILE.*Well defined'; then echo "  PASS config parses"; PASS=$((PASS+1)); else echo "  FAIL config parse"; FAIL=$((FAIL+1)); fi
