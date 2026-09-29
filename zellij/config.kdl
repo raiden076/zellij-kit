@@ -65,6 +65,29 @@ keybinds clear-defaults=true {
     shared_except "locked" "resize" {
         bind "Ctrl n" { SwitchToMode "resize"; }
     }
+    // Scrollback navigation (V13). clear-defaults=true unbinds zellij's own
+    // scroll mode, which leaves no way to reach the scroll buffer — fatal for
+    // fullscreen TUIs that capture the mouse (omp etc.): wheel/touch events go
+    // to the app (termux/termux-app#4302), so Ctrl+s scroll mode is the only
+    // reliable path on a phone. Ctrl+c jumps to the live bottom without sending
+    // SIGINT (zellij intercepts it in this mode).
+    scroll {
+        bind "up" { ScrollUp; }
+        bind "down" { ScrollDown; }
+        bind "left" { PageScrollUp; }
+        bind "right" { PageScrollDown; }
+        bind "PageUp" { PageScrollUp; }
+        bind "PageDown" { PageScrollDown; }
+        bind "u" { HalfPageScrollUp; }
+        bind "d" { HalfPageScrollDown; }
+        bind "Ctrl b" { PageScrollUp; }
+        bind "Ctrl f" { PageScrollDown; }
+        bind "Ctrl c" { ScrollToBottom; SwitchToMode "normal"; }
+        bind "Ctrl s" { SwitchToMode "normal"; }
+    }
+    shared_except "locked" "scroll" {
+        bind "Ctrl s" { SwitchToMode "scroll"; }
+    }
     shared_except "normal" "locked" {
         bind "enter" { SwitchToMode "normal"; }
     }
@@ -286,7 +309,7 @@ show_startup_tips false
 // Whether to show release notes on first version run
 // Default: true
 // 
-// show_release_notes false
+show_release_notes false
  
 // Whether to enable mouse hover effects and pane grouping functionality
 // default is true

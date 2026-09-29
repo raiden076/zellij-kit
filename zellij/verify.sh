@@ -23,6 +23,16 @@ check_neg "no hint pane in default.kdl" grep -q 'C-g lock' "$LYT"
 check_neg "no .wasm in layouts" grep -rq '\.wasm' "$ZDIR/layouts/"
 check "help.sh present" test -f "$HELP"
 check "help path points at HOME" grep -q "\"$HOME/.config/zellij/help.sh\"" "$CFG"
+check "release-notes float off" grep -q '^show_release_notes false$' "$CFG"
+
+echo "=== Scrollback reachable (V13) ==="
+# clear-defaults=true unbinds zellij's built-in scroll mode; without explicit
+# binds a fullscreen TUI that captures the mouse leaves no way to scroll back.
+check "Ctrl s enters scroll mode" grep -q 'bind "Ctrl s" { SwitchToMode "scroll"; }' "$CFG"
+check "scroll mode exits on Ctrl s" bash -c "grep -A16 'scroll {' \"$CFG\" | grep -q 'bind \"Ctrl s\" { SwitchToMode \"normal\"'"
+check "ScrollToBottom bound (jump to live bottom)" grep -q 'ScrollToBottom' "$CFG"
+check "PageScrollUp bound" grep -q 'PageScrollUp' "$CFG"
+check_neg "Ctrl s not bound in locked mode" bash -c "grep -A3 'locked {' \"$CFG\" | grep -q 'Ctrl s'"
 
 echo "=== Keybinds: clear-defaults + explicit (V8) ==="
 check "clear-defaults=true" grep -q 'keybinds clear-defaults=true' "$CFG"

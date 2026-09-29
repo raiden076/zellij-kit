@@ -62,7 +62,10 @@ session_count=${#sessions[@]}
 # ── menu ─────────────────────────────────────────────────
 
 show_menu() {
-    clear
+    # `clear` exits 1 when the terminfo entry is missing (TERM=dumb, bare
+    # environments); under `set -e` that killed the whole selector before it
+    # printed anything, so a login landed on a dead shell (B19).
+    clear 2>/dev/null || true
     echo "=== Zellij Session Selector ==="
     echo ""
 
